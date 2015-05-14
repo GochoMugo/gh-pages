@@ -1,0 +1,108 @@
+#
+# Run Script
+#
+# MIT License
+# Copyright (c) 2015 GochoMugo <mugo@forfuture.co.ke>
+#
+
+
+# metadata
+AUTHOR="GochoMugo <mugo@forfuture.co.ke>"
+VERSION="0.0.0"
+
+
+# script variables
+LOG_TITLE="gh-pages"
+command -v gh-pages > /dev/null 2>&1 && {
+  ROOT="$(which gh-pages)"
+} || {
+  ROOT="."
+}
+ORIGIN="${ROOT}/gh-pages-lib"
+TEMPLATES="${ROOT}/gh-pages-templates"
+
+
+
+# utilities
+source $ORIGIN/utils.sh
+
+
+case ${1} in
+  "prepare" )
+    log "preparing repository" 0
+    mkdir -p .travis
+    cp -rf ${ORIGIN}/* .travis
+    [ ${2} ] || {
+      log "using template: ${2}" 0
+      [ ! -d ${TEMPLATES}/${2} ] && {
+        log "missing template" 2
+        exit
+      }
+      cp -rf $TEMPLATES/${2}/* .travis
+    }
+    mv -i .travis/.travis.yml .
+    log "done with preparation" 1
+  ;;
+  "finish" )
+    log "finishing up" 0
+    command -v travis > /dev/null 2>&1 || {
+      log "travis command missing" 2
+      log "please install this command using: gem install travis" 2
+      exit
+    }
+    if [ ! -e .travis/config.sh ]
+    then
+      log "fill in these details" 0
+      read -p "    Repository Url: " REPO_URL
+      read -p "    Branch to Deploy to [gh-pages]: " BRANCH
+      read -p "    Github Username: " USER_NAME
+      read -p "    Email Address: " USER_EMAIL
+      read -p "    Access Token: " GH_TOKEN
+      echo "REPO_URL=${REPO_URL}" >> .travis/config.sh
+      echo "BRANCH=${BRANCH}" >> .travis/config.sh
+      echo "USER_NAME=${USER_NAME}" >> .travis/config.sh
+      echo "USER_EMAIL=${USER_EMAIL}" >> .travis/config.sh
+      travis encrypt GH_TOKEN=${GH_TOKEN} --skip-version-check --add
+      log "finished!" 1
+    fi
+  ;;
+  "template" )
+    log "adding/upgrading template from git Url" 0
+    [ ${2} ] || {
+      log "template name is required" 2
+      exit
+    }
+    [ ${3} ] || {
+      log "git-url is required" 2
+      exit
+    }
+    cd tmp/
+    rm -r template
+    git clone ${3} template
+    cp -rf template ${TEMPLATES}/${2}
+    cd -
+  ;;
+  "info" )
+    echo
+    echo " Adding templates:"
+    echo "    ⇒ gh-pages template <name> <git-url>"
+    echo
+    echo " Scripts run on Travis during each Build:"
+    echo "    .travis/deps.sh -- install dependencies"
+    echo "    .travis/build.sh -- build your website"
+    echo "    .travis/deploy.sh -- deploys the site"
+    echo
+    echo " Other Scripts:"
+    echo "    .travis/config.sh -- your configuration information"
+    echo
+    echo " More Information:"
+    echo "    Head over to https://github.com/settings/tokens to"
+    echo "     generate new tokens"
+    echo
+  ;;
+  "version" )
+    log "gh-pages by ${AUTHOR}" 0
+    log "gh-pages version ${VERSION}" 0
+  ;;
+esac
+
