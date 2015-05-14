@@ -1,5 +1,6 @@
 #
-# Building the Website using gitbook
+# This script is used to build the website, usually to the final
+# HTML output
 #
 
 
@@ -15,6 +16,6 @@ source .travis/utils.sh
 LOG_TITLE="build"
 
 
-log "building using gitbook" 0
-gitbook build
+log "nothing to build" 2
+exit 1
 

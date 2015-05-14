@@ -1,5 +1,5 @@
 #
-# Installs our dependencies
+# Installs any dependencies that we require to build the site
 #
 
 
@@ -15,8 +15,5 @@ source .travis/utils.sh
 LOG_TITLE="deps"
 
 
-command -v gitbook > /dev/null 2>&1 || {
-  log "installing gitbook globally" 0
-  npm install -g gitbook-cli
-}
+log "nothing to install" 0
 

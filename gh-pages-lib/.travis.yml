@@ -1,0 +1,6 @@
+language: node_js
+node_js:
+- '0.12'
+install: .travis/deps.sh
+script: .travis/build.sh
+after_success: .travis/deploy.sh

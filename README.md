@@ -12,7 +12,8 @@ Automatically Deploy your Repo with Github Pages
 ## installation:
 
 ```bash
-⇒ wget -qO-  | bash
+⇒ wget -qO- http://git.io/vU7iB | bash
+⇒ gh-pages recommended-templates # optional but useful
 ```
 
 
@@ -39,7 +40,7 @@ Automatically Deploy your Repo with Github Pages
 ## help information:
 
 ```
-⇒ gh-pages info
+⇒ gh-pages help
 ```
 
 

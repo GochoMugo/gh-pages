@@ -1,5 +1,6 @@
 #
-# Deploy site to the gh-pages branch
+# Deploys the site to the branch configured, usually the gh-pages
+# branch
 #
 
 

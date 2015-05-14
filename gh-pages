@@ -14,12 +14,15 @@ VERSION="0.0.0"
 # script variables
 LOG_TITLE="gh-pages"
 command -v gh-pages > /dev/null 2>&1 && {
-  ROOT="$(which gh-pages)"
+  CMD="$(which gh-pages)"
+  ROOT="$(dirname ${CMD})"
 } || {
   ROOT="."
 }
 ORIGIN="${ROOT}/gh-pages-lib"
 TEMPLATES="${ROOT}/gh-pages-templates"
+
+GITBOOK_URL="https://github.com/GochoMugo/gh-pages-gitbook"
 
 
 
@@ -31,14 +34,15 @@ case ${1} in
   "prepare" )
     log "preparing repository" 0
     mkdir -p .travis
-    cp -rf ${ORIGIN}/* .travis
-    [ ${2} ] || {
+    cp -rf ${ORIGIN}/* ${ORIGIN}/.travis.yml .travis
+    [ ${2} ] && {
       log "using template: ${2}" 0
-      [ ! -d ${TEMPLATES}/${2} ] && {
+      templateDir="$TEMPLATES/${2}"
+      [ ! -d ${templateDir} ] && {
         log "missing template" 2
         exit
       }
-      cp -rf $TEMPLATES/${2}/* .travis
+      cp -rf ${templateDir}/* ${templateDir}/.travis.yml .travis > /dev/null 2>&1
     }
     mv -i .travis/.travis.yml .
     log "done with preparation" 1
@@ -53,11 +57,12 @@ case ${1} in
     if [ ! -e .travis/config.sh ]
     then
       log "fill in these details" 0
+      ask "Repository Url" 
       read -p "    Repository Url: " REPO_URL
       read -p "    Branch to Deploy to [gh-pages]: " BRANCH
       read -p "    Github Username: " USER_NAME
       read -p "    Email Address: " USER_EMAIL
-      read -p "    Access Token: " GH_TOKEN
+      read -p "    Github Access Token: " GH_TOKEN
       echo "REPO_URL=${REPO_URL}" >> .travis/config.sh
       echo "BRANCH=${BRANCH}" >> .travis/config.sh
       echo "USER_NAME=${USER_NAME}" >> .travis/config.sh
@@ -67,7 +72,7 @@ case ${1} in
     fi
   ;;
   "template" )
-    log "adding/upgrading template from git Url" 0
+    log "adding/upgrading ${2} from git Url" 0
     [ ${2} ] || {
       log "template name is required" 2
       exit
@@ -76,13 +81,33 @@ case ${1} in
       log "git-url is required" 2
       exit
     }
-    cd tmp/
-    rm -r template
-    git clone ${3} template
-    cp -rf template ${TEMPLATES}/${2}
-    cd -
+    cd /tmp/
+    rm -rf template
+    git clone ${3} template > /dev/null 2>&1 && {
+      rm -rf ${TEMPLATES}/${2}
+      mv template ${TEMPLATES}/${2}
+    } || {
+      log "failed to get ${2}" 2
+    }
   ;;
-  "info" )
+  "recommended-templates" )
+    log "adding/upgrading recommended templates for: " 0
+    ask_bool "gitbook" "y" && {
+      gh-pages template gitbook ${GITBOOK_URL}
+    }
+    log "done!" 0
+  ;;
+  "version" )
+    log "gh-pages by ${AUTHOR}" 0
+    log "gh-pages version ${VERSION}" 0
+  ;;
+  "info" | "help" | * )
+    echo
+    echo " Preparing Repos:"
+    echo "    ⇒ gh-pages prepare [template-name]"
+    echo
+    echo " Finishing on Repos:"
+    echo "    ⇒ gh-pages finish"
     echo
     echo " Adding templates:"
     echo "    ⇒ gh-pages template <name> <git-url>"
@@ -96,13 +121,11 @@ case ${1} in
     echo "    .travis/config.sh -- your configuration information"
     echo
     echo " More Information:"
+    echo "    You can easily install recommended templates using"
+    echo "     ⇒ gh-pages recommended-templates"
     echo "    Head over to https://github.com/settings/tokens to"
     echo "     generate new tokens"
     echo
-  ;;
-  "version" )
-    log "gh-pages by ${AUTHOR}" 0
-    log "gh-pages version ${VERSION}" 0
   ;;
 esac
 
