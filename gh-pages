@@ -53,12 +53,11 @@ case ${1} in
     command -v travis > /dev/null 2>&1 || {
       log "travis command missing" 2
       log "please install this command using: gem install travis" 2
-      exit
+      exit 1
     }
     if [ ! -e .travis/config.sh ]
     then
       log "fill in these details" 0
-      ask "Repository Url" 
       read -p "    Repository Url: " REPO_URL
       read -p "    Branch to Deploy to [gh-pages]: " BRANCH
       read -p "    Output Directory [_out]: " DEST_DIR
@@ -72,7 +71,11 @@ case ${1} in
       echo "DEST_DIR=${DEST_DIR}" >> .travis/config.sh
       echo "USER_NAME=${USER_NAME}" >> .travis/config.sh
       echo "USER_EMAIL=${USER_EMAIL}" >> .travis/config.sh
-      travis encrypt GH_TOKEN=${GH_TOKEN} --skip-version-check --add
+      travis encrypt GH_TOKEN=${GH_TOKEN} --skip-version-check --add || {
+        log "failed!" 2
+        rm .travis/config.sh
+        exit 1
+      }
       log "finished!" 1
     fi
   ;;
