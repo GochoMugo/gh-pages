@@ -32,7 +32,7 @@ rm -rf *
 
 
 log "copying gitbook output to gh-pages branch" 0
-cp -r ../_book/* .
+cp -r ../${DEST_DIR}/* .
 
 
 log "configuring git" 0

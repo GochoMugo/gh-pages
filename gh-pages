@@ -22,7 +22,8 @@ command -v gh-pages > /dev/null 2>&1 && {
 ORIGIN="${ROOT}/gh-pages-lib"
 TEMPLATES="${ROOT}/gh-pages-templates"
 
-GITBOOK_URL="https://github.com/GochoMugo/gh-pages-gitbook"
+GITBOOK_URL="https://github.com/GochoMugo/gh-pages-gitbook.git"
+JEKYLL_URL="https://github.com/GochoMugo/gh-pages-jekyll.git"
 
 
 
@@ -60,11 +61,15 @@ case ${1} in
       ask "Repository Url" 
       read -p "    Repository Url: " REPO_URL
       read -p "    Branch to Deploy to [gh-pages]: " BRANCH
+      read -p "    Output Directory [_out]: " DEST_DIR
       read -p "    Github Username: " USER_NAME
       read -p "    Email Address: " USER_EMAIL
       read -p "    Github Access Token: " GH_TOKEN
+      [ ${BRANCH} ] || BRANCH="gh-pages"
+      [ ${DEST_DIR} ] || DEST_DIR="_out"
       echo "REPO_URL=${REPO_URL}" >> .travis/config.sh
       echo "BRANCH=${BRANCH}" >> .travis/config.sh
+      echo "DEST_DIR=${DEST_DIR}" >> .travis/config.sh
       echo "USER_NAME=${USER_NAME}" >> .travis/config.sh
       echo "USER_EMAIL=${USER_EMAIL}" >> .travis/config.sh
       travis encrypt GH_TOKEN=${GH_TOKEN} --skip-version-check --add
@@ -95,6 +100,9 @@ case ${1} in
     ask_bool "gitbook" "y" && {
       gh-pages template gitbook ${GITBOOK_URL}
     }
+    ask_bool "jekyll" "y" && {
+      gh-pages template jekyll ${JEKYLL_URL}
+    }
     log "done!" 0
   ;;
   "version" )
@@ -123,6 +131,10 @@ case ${1} in
     echo
     echo " Other Scripts:"
     echo "    .travis/config.sh -- your configuration information"
+    echo
+    echo " Other commands:"
+    echo "    ⇒ gh-pages version # show version information"
+    echo "    ⇒ gh-pages upgrade # upgrade gh-pages"
     echo
     echo " More Information:"
     echo "    You can easily install recommended templates using"
