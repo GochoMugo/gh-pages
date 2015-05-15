@@ -101,6 +101,10 @@ case ${1} in
     log "gh-pages by ${AUTHOR}" 0
     log "gh-pages version ${VERSION}" 0
   ;;
+  "upgrade" )
+    log "upgrading to the latest version" 0
+    wget -qO- http://git.io/vU7iB | bash
+  ;;
   "info" | "help" | * )
     echo
     echo " Preparing Repos:"
