@@ -1,12 +1,12 @@
 
 # gh-pages
 
-Automatically Deploy your Repo with Github Pages
+Automatically Deploy your Repo with [Github Pages](https://pages.github.com)
 
 
 ## prerequisites:
 
-* Signed up at [Travis CI](travis-ci.org)
+* Signed up at [Travis CI](https://travis-ci.org)
 
 
 ## installation:
@@ -25,11 +25,8 @@ Automatically Deploy your Repo with Github Pages
   ⇒ gh-pages prepare
   ```
 
-1. Generate an access token on Github. **Take note of the token**.
-
-  ![generate-access-token](screenshots/token.png)
-
 1. Add repository in Travis CI.
+
 1. Finish up
 
   ```bash
@@ -39,7 +36,7 @@ Automatically Deploy your Repo with Github Pages
 
 ## help information:
 
-```
+```bash
 ⇒ gh-pages help
 ```
 
