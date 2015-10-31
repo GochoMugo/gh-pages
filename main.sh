@@ -6,21 +6,15 @@
 #
 
 
-# metadata
-AUTHOR="GochoMugo <mugo@forfuture.co.ke>"
-VERSION="0.0.0"
+# modules
+msu_require "console"
 
 
 # script variables
-LOG_TITLE="gh-pages"
-command -v gh-pages > /dev/null 2>&1 && {
-  CMD="$(which gh-pages)"
-  ROOT="$(dirname ${CMD})"
-} || {
-  ROOT="."
-}
-ORIGIN="${ROOT}/gh-pages-lib"
-TEMPLATES="${ROOT}/gh-pages-templates"
+DEPS="curl"
+ROOT=$(dirname ${BASH_SOURCE[0]})  # directory holding this file
+LIB="${ROOT}/lib"                  # path to our lib
+TEMPLATES="${HOME}/.gh-pages/templates"  # installed templates
 
 # templates
 GITBOOK_URL="https://github.com/GochoMugo/gh-pages-gitbook.git"
@@ -30,57 +24,73 @@ JEKYLL_URL="https://github.com/GochoMugo/gh-pages-jekyll.git"
 SCOPES="[\"public_repo\"]"
 
 
-# utilities
-source $ORIGIN/utils.sh
+# main entry point
+function main() {
 
+# ensure environment is ready for us.
+mkdir -p "${TEMPLATES}"
 
 case ${1} in
-  "prepare" )
-    log "preparing repository" 0
+  "p" | "prepare" )
+    # creating the directory for the scripts
     mkdir -p .travis
-    cp -rf ${ORIGIN}/* ${ORIGIN}/.travis.yml .travis
+
+    # copying scripts from lib to the scripts directory
+    cp -rf ${LIB}/* ${LIB}/.travis.yml .travis > /dev/null 2>&1
+
+    # we might be using a template
     [ ${2} ] && {
-      log "using template: ${2}" 0
+      log "using template: ${2}"
       templateDir="$TEMPLATES/${2}"
       [ ! -d ${templateDir} ] && {
-        log "missing template" 2
-        exit
+        error "missing template ${2}"
+        exit 1
       }
       cp -rf ${templateDir}/* ${templateDir}/.travis.yml .travis > /dev/null 2>&1
     }
+
+    # moving travis configuration file to root of cwd
     mv -i .travis/.travis.yml .
-    log "done with preparation" 1
+    success "done with preparation"
   ;;
-  "finish" )
-    log "finishing up" 0
+
+  "f" | "finish" )
+    # ensure the `travis` command is available
     command -v travis > /dev/null 2>&1 || {
-      log "travis command missing" 2
-      log "please install this command using: gem install travis" 2
+      error "\`travis' command missing"
+      error "please install \`travis' using: gem install travis"
       exit 1
     }
+
+    # configuration file
     CONFIG_FILE=".travis/config.sh"
+
+    # if the configuration file does not exist, we create for the user
     if [ ! -e ${CONFIG_FILE} ]
     then
       log "please fill in these details" 0
       BRANCH="gh-pages"
       DEST_DIR="_out"
+
+      # if we are in a git repository
       if [ -d .git ]
       then
         REPO_URL="$(git remote -v | grep -Ei 'origin.*push' | grep -Eio '[a-z]+://.* ')"
         USER_NAME="$(git config user.name)"
         USER_EMAIL="$(git config user.email)"
       fi
-      read -p "    Repository Url [$REPO_URL]: " REPO_URL
-      read -p "    Branch to Deploy to [${BRANCH}]: " BRANCH
-      read -p "    Output Directory [${DEST_DIR}]: " DEST_DIR
-      read -p "    Github Username [${USER_NAME}]: " USER_NAME
-      read -p "    Email Address [${USER_EMAIL}]: " USER_EMAIL
+
+      ask "Repository Url [$REPO_URL]:" REPO_URL
+      ask "Branch to Deploy to [${BRANCH}]:" BRANCH
+      ask "Output Directory [${DEST_DIR}]:" DEST_DIR
+      ask "Github Username [${USER_NAME}]:" USER_NAME
+      ask "Email Address [${USER_EMAIL}]:" USER_EMAIL
+
+      # if token file does not exist, we should create it, by getting a github token
+      # and placing it in the file.
       if [ ! -e .token ]
       then
-        read -p "    Github Password: " -s USER_PASS
-        echo
-        echo "    --- Please Wait ---"
-        echo
+        ask "Github Password" USER_PASS 1
         curl -s \
           -u ${USER_NAME}:${USER_PASS} \
           -X POST https://api.github.com/authorizations \
@@ -92,71 +102,97 @@ case ${1} in
           | grep -Eio "[a-z0-9]+" > .token
       fi
       GH_TOKEN="$(cat .token)"
+
+      # if we failed to generate an access token.
       [ ${GH_TOKEN} ] || {
-        log "failed to generate an access token from Github" 2
-        ask_bool "show error response" "n" && {
+        error "failed to generate an access token from Github"
+        yes_no "show error response" "N" && {
           cat .res
           rm .res .token
         }
         exit 1
       }
+
+      # we done with the response.
       rm .res
+
+      # save the configurations to file.
       echo "REPO_URL=${REPO_URL}" >> ${CONFIG_FILE}
       echo "BRANCH=${BRANCH}" >> ${CONFIG_FILE}
       echo "DEST_DIR=${DEST_DIR}" >> ${CONFIG_FILE}
       echo "USER_NAME=${USER_NAME}" >> ${CONFIG_FILE}
       echo "USER_EMAIL=${USER_EMAIL}" >> ${CONFIG_FILE}
+
+      # use `travis` to encrypt the access token.
       travis encrypt GH_TOKEN=${GH_TOKEN} \
         --skip-version-check --add || {
-        log "failed encrypting with travis!" 2
-        log "!! note that your github access token has been saved to .token" 2
-        log "!! ensure you do NOT commit this file" 2
-        log "!! RETRY! On success, .token will be auto-deleted" 2
+        error "failed encrypting with \`travis'"
+        error "note that your github access token has been saved to .token"
+        error "ensure you do NOT commit this file"
+        error "RETRY! On success, .token will be auto-deleted"
         rm ${CONFIG_FILE}
         exit 1
       }
+
+      # we have encrypted the access token unto travis servers.
       rm .token
-      log "finished!" 1
+      success "finished!"
     fi
   ;;
-  "template" )
-    log "adding/upgrading ${2} from git Url" 0
+
+  "t" | "template" )
     [ ${2} ] || {
-      log "template name is required" 2
-      exit
+      error "template name is required"
+      exit 1
     }
+
     [ ${3} ] || {
-      log "git-url is required" 2
-      exit
+      error "git url is required"
+      exit 1
     }
-    cd /tmp/
+
+    # move to tempdir for hygiene purposes.
+    pushd /tmp/ > /dev/null
+
+    # if a previous run had occurred before this, ensure it is clean.
     rm -rf template
+
+    # clone the template's repo.
     git clone ${3} template > /dev/null 2>&1 && {
+      # remove previous installations, and install this template.
       rm -rf ${TEMPLATES}/${2}
       mv template ${TEMPLATES}/${2}
+      tick "${2}"
     } || {
-      log "failed to get ${2}" 2
+      error "failed to clone ${2}'s repo"
+      exit 1
     }
   ;;
-  "recommended-templates" )
-    log "adding/upgrading recommended templates for: " 0
-    ask_bool "gitbook" "y" && {
-      gh-pages template gitbook ${GITBOOK_URL}
+
+  "r" | "recommended-templates" )
+    # gitbook template.
+    yes_no "gitbook" "y" && {
+      msu run gh-pages.main.main template gitbook ${GITBOOK_URL}
     }
-    ask_bool "jekyll" "y" && {
-      gh-pages template jekyll ${JEKYLL_URL}
+
+    # jekyll template.
+    yes_no "jekyll" "y" && {
+      msu run gh-pages.main.main template jekyll ${JEKYLL_URL}
     }
-    log "done!" 0
+
+    exit 0
   ;;
-  "version" )
-    log "gh-pages by ${AUTHOR}" 0
-    log "gh-pages version ${VERSION}" 0
+
+  "v" | "version" )
+    msu version gh-pages
   ;;
-  "upgrade" )
-    log "upgrading to the latest version" 0
-    wget -qO- http://git.io/vU7iB | bash
+
+  "u" | "upgrade" )
+    log "upgrading to the latest version"
+    msu install gh:GochoMugo/gh-pages
   ;;
-  "info" | "help" | * )
+
+  "i" | "info" | "h" | "help" | * )
     echo
     echo " Preparing Repos:"
     echo "    ⇒ gh-pages prepare [template-name]"
@@ -185,4 +221,6 @@ case ${1} in
     echo
   ;;
 esac
+
+}
 

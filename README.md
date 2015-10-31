@@ -6,13 +6,14 @@ Automatically Deploy your Repo with [Github Pages](https://pages.github.com)
 
 ## prerequisites:
 
+* [msu](https://github.com/GochoMugo/msu)
 * Signed up at [Travis CI](https://travis-ci.org)
 
 
 ## installation:
 
 ```bash
-⇒ wget -qO- http://git.io/vU7iB | bash
+⇒ msu install gh:GochoMugo/gh-pages
 ⇒ gh-pages recommended-templates # optional but useful
 ```
 
