@@ -48,7 +48,7 @@ case ${1} in
       templateDir="${TEMPLATES_DIR}/${2}"
       [ ! -d ${templateDir} ] && {
         error "missing template ${2}"
-        exit 1
+        return 1
       }
       cp -rf "${templateDir}"/* "${templateDir}/.travis.yml" "${DATA_DIR}" > /dev/null 2>&1
     }
@@ -159,12 +159,12 @@ case ${1} in
   "t" | "template" )
     [ ${2} ] || {
       error "template name is required"
-      exit 1
+      return 1
     }
 
     [ ${3} ] || {
       error "git url is required"
-      exit 1
+      return 1
     }
 
     # move to tempdir for hygiene purposes.
@@ -181,7 +181,7 @@ case ${1} in
       tick "${2}"
     } || {
       error "failed to clone ${2}'s repo"
-      exit 1
+      return 1
     }
   ;;
 
