@@ -195,11 +195,6 @@ case ${1} in
   ;;
 
   "r" | "recommended-templates" )
-    # gitbook template.
-    yes_no "gitbook" "y" && {
-      main template gitbook ${GITBOOK_URL}
-    }
-
     # jekyll template.
     yes_no "jekyll" "y" && {
       main template jekyll ${JEKYLL_URL}
