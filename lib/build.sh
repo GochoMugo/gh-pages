@@ -9,7 +9,7 @@ set -e
 
 
 # utilities
-source .travis/utils.sh
+source "${DATA_DIR}/utils.sh"
 
 
 # script variables
@@ -18,4 +18,3 @@ LOG_TITLE="build"
 
 log "nothing to build" 2
 exit 1
-

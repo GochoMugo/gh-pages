@@ -1,6 +1,13 @@
-language: node_js
-node_js:
-- '0.12'
-install: .travis/deps.sh
-script: .travis/build.sh
-after_success: .travis/deploy.sh
+language: ruby
+rvm:
+- '2.2'
+branches:
+  except:
+    - "${BRANCH}"
+install: "${DATA_DIR}/deps.sh"
+script: "${DATA_DIR}/build.sh"
+after_success: "${DATA_DIR}/deploy.sh"
+env:
+  global:
+    - DATA_DIR="${DATA_DIR}"
+    - OUT_DIR="${OUT_DIR}"
