@@ -12,6 +12,7 @@ msu_require "console"
 
 
 # script variables
+GH_PAGES_VERSION="1.0.0"
 DEPS="curl travis"
 ROOT=$(dirname ${BASH_SOURCE[0]})  # directory holding this file
 LIB="${ROOT}/lib"                  # path to our lib
@@ -216,6 +217,8 @@ case ${1} in
 
   "info" | "h" | "help" | * )
     echo
+    echo " gh-pages v${GH_PAGES_VERSION}"
+    echo
     echo " Initialize:"
     echo "    ⇒ gh-pages init [template-name]"
     echo
@@ -223,21 +226,23 @@ case ${1} in
     echo "    ⇒ gh-pages template <name> <git-url>"
     echo
     echo " Scripts run on Travis during each Build:"
-    echo "    .travis/deps.sh      install dependencies"
-    echo "    .travis/build.sh     build your website"
-    echo "    .travis/deploy.sh    deploys the site"
+    echo "    \${DATA_DIR}/deps.sh      install dependencies"
+    echo "    \${DATA_DIR}/build.sh     build your website"
+    echo "    \${DATA_DIR}/deploy.sh    deploys the site"
     echo
     echo " Other Scripts:"
-    echo "    .travis/config.sh    your configuration information"
+    echo "    \${DATA_DIR}/config.sh    your configuration information"
     echo
     echo " Other commands:"
-    echo "    ⇒ gh-pages templates lists all installed templates"
-    echo "    ⇒ gh-pages version   show version information"
-    echo "    ⇒ gh-pages upgrade   upgrade gh-pages"
+    echo "    ⇒ gh-pages templates      list all installed templates"
+    echo "    ⇒ gh-pages version        show version information"
+    echo "    ⇒ gh-pages upgrade        upgrade gh-pages"
     echo
     echo " More Information:"
     echo "    You can easily install recommended templates using"
     echo "     ⇒ gh-pages recommended-templates"
+    echo "    See https://github.com/GochoMugo/gh-pages for more"
+    echo "      source code, feature requests and bugs"
     echo
   ;;
 esac
