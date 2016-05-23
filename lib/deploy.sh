@@ -61,7 +61,7 @@ log "pushing changes to remote" 0
 git push origin ${BRANCH} > /dev/null
 if [ $? ]
 then
-  log "successful deployment" 1 \
+  log "successful deployment" 1
 else
   log "failed deployment" 2
   exit 1
