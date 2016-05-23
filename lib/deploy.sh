@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Deploys the site to the branch configured, usually the gh-pages
 # branch

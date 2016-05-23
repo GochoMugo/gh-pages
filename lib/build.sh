@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # This script is used to build the website, usually to the final
 # HTML output

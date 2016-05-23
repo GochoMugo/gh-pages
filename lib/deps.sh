@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Installs any dependencies that we require to build the site
 #
