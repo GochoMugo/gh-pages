@@ -1,37 +1,38 @@
-
 # gh-pages
 
-Automatically Deploy your Repo with [Github Pages](https://pages.github.com)
+> Get started with [Github Pages][pages] in a faster way
+
+
+## introduction:
+
+This is a [msu][msu] module that aids you setting up your [Github Pages][pages].
+It basically sets up a bunch of shell scripts that will be executed
+on commit by [Travis CI][travis].
 
 
 ## prerequisites:
 
-* Signed up at [Travis CI](https://travis-ci.org)
+* [msu][msu]
+* signed up at [Travis CI][travis]
 
 
 ## installation:
 
 ```bash
-⇒ wget -qO- http://git.io/vU7iB | bash
+⇒ msu install gh:GochoMugo/gh-pages
 ⇒ gh-pages recommended-templates # optional but useful
 ```
 
 
-## setup:
+## usage:
 
-1. Prepare your repo
+Initialize your repository by running:
 
-  ```bash
-  ⇒ gh-pages prepare
-  ```
+```bash
+$ gh-pages init
+```
 
-1. Add repository in Travis CI.
-
-1. Finish up
-
-  ```bash
-  ⇒ gh-pages finish
-  ```
+It will prompt and advise you accordingly, in the process of setting up.
 
 
 ## help information:
@@ -41,9 +42,23 @@ Automatically Deploy your Repo with [Github Pages](https://pages.github.com)
 ```
 
 
+## templates:
+
+This module is useless on its own as it does **not** include logic
+for building sites in any framework. However, some templates are
+available:
+
+* [jekyll](https://github.com/GochoMugo/gh-pages-jekyll)
+* *send a PR to have yours added here*
+
+
 ## license:
 
 **The MIT License (MIT)**
 
-Copyright (c) 2015 GochoMugo <mugo@forfuture.co.ke>
+Copyright (c) 2015-2016 GochoMugo (www.gmugo.in)
 
+
+[msu]:https://github.com/GochoMugo/msu
+[travis]:https://travis-ci.org
+[pages]:https://pages.github.com
