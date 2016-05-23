@@ -12,7 +12,7 @@ msu_require "console"
 
 
 # script variables
-GH_PAGES_VERSION="1.0.0"
+GH_PAGES_VERSION="1.0.1"
 DEPS="curl travis"
 ROOT=$(dirname ${BASH_SOURCE[0]})  # directory holding this file
 LIB="${ROOT}/lib"                  # path to our lib
@@ -195,11 +195,6 @@ case ${1} in
   ;;
 
   "r" | "recommended-templates" )
-    # gitbook template.
-    yes_no "gitbook" "y" && {
-      main template gitbook ${GITBOOK_URL}
-    }
-
     # jekyll template.
     yes_no "jekyll" "y" && {
       main template jekyll ${JEKYLL_URL}
