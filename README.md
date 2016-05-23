@@ -1,6 +1,8 @@
 
 # gh-pages
 
+**NOTE: THIS IS VERSION 0.** (Incompatible with Version 1+)
+
 Automatically Deploy your Repo with [Github Pages](https://pages.github.com)
 
 
