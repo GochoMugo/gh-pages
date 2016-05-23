@@ -15,7 +15,7 @@ msu_require "console"
 DEPS="curl travis"
 ROOT=$(dirname ${BASH_SOURCE[0]})  # directory holding this file
 LIB="${ROOT}/lib"                  # path to our lib
-TEMPLATES_DIR="${GH_PAGES_TEMPLATES_DIR:-${HOME}/.gh-pages/templates}"  # installed templates
+TEMPLATES_DIR="${GH_PAGES_TEMPLATES_DIR:-${ROOT}/templates}" # installed templates
 DATA_DIR="${GH_PAGES_DATA_DIR:-.gh-pages}" # name of the directory to store data
 CONFIG_FILE="${DATA_DIR}/config.sh" # configuration file
 
@@ -108,7 +108,9 @@ case ${1} in
      https://github.com/settings/tokens/new and place it in a\n\
      file named '.token' in this directory and re-run this command."
       yes_no "Continue to automated-token creation" || return 2
+
       ask "Github Password" USER_PASS 1
+      log "Sending request for new access token"
       curl -s \
         -u ${USER_NAME}:${USER_PASS} \
         -X POST https://api.github.com/authorizations \
@@ -137,6 +139,7 @@ case ${1} in
     GH_TOKEN="$(cat .token)"
 
     # use `travis` to encrypt the access token.
+    log "encrypting token, using \`travis'"
     travis encrypt GH_TOKEN=${GH_TOKEN} \
       --skip-version-check --add || {
       error "failed encrypting with \`travis'"
@@ -173,12 +176,21 @@ case ${1} in
     git clone ${3} gh-template > /dev/null 2>&1 && {
       # remove previous installations, and install this template.
       rm -rf "${TEMPLATES_DIR}/${2}"
-      mv gh-template "${TEMPLATES}/${2}"
+      mv gh-template "${TEMPLATES_DIR}/${2}"
       tick "${2}"
     } || {
       error "failed to clone ${2}'s repo"
       exit 1
     }
+  ;;
+
+  "l" | "templates" )
+    for dir in "${TEMPLATES_DIR}"/*
+    do
+      template="$(basename ${dir})"
+      [[ "${template}" == "*" ]] && return
+      list "${template}"
+    done
   ;;
 
   "r" | "recommended-templates" )
@@ -219,6 +231,7 @@ case ${1} in
     echo "    .travis/config.sh    your configuration information"
     echo
     echo " Other commands:"
+    echo "    ⇒ gh-pages templates lists all installed templates"
     echo "    ⇒ gh-pages version   show version information"
     echo "    ⇒ gh-pages upgrade   upgrade gh-pages"
     echo
